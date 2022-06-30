@@ -1,3 +1,5 @@
+use std::io::Read;
+
 use reqwest as requests; // For my own sanity, i _hate_ typing reqwests
 use serde::{Serialize, Deserialize};
 use aws_sdk_ssm::{Client, Error};
@@ -39,22 +41,6 @@ impl TwitterClient {
     }
 
     pub async fn upload_image(&self) -> Result<(), Box<dyn std::error::Error>> {
-        println!("Uploading image...");
-        let img_contents = std::fs::read("image.jpg").unwrap();
-        let contents = base64::encode(&img_contents);
-
-        let params = [("media_data", contents.as_str()), ("media_category", "tweet_image")];
-
-        // TODO: Get response from API 
-        let response = self.client.post("https://upload.twitter.com/1.1/media/upload.json")
-            .header("Authorization", format!("Bearer {}", self.auth_token))
-            .form(&params)
-            .send()
-            .await?
-            .text()
-            .await?;
-
-        println!("Response: {:?}", response);
         Ok(())
     }
 }
