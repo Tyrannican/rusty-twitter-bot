@@ -27,7 +27,7 @@ pub struct Card {
 }
 
 impl Card {
-    pub fn download_artwork(&self) {
+    pub async fn download_artwork(&self) -> Result<(), Box<dyn std::error::Error>> {
         println!("Downloading artwork for {}...", self.name.as_ref().unwrap());
         let artcrop = self.image_uris
             .as_ref()
@@ -39,12 +39,17 @@ impl Card {
         let mut img_file = std::fs::File::create("image.jpg")
             .expect("unable to open file handle");
 
-        tokio::task::spawn_blocking( move || {    
+        let task = tokio::task::spawn_blocking( move || {    
             requests::blocking::get(artcrop)
                 .unwrap()
                 .copy_to(&mut img_file)
                 .unwrap();
-        });
+            }
+        );
+
+        task.await?;
+
+        Ok(())
     }
 
     pub fn is_invalid(&self) -> bool {
